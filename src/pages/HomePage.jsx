@@ -4,6 +4,7 @@ import PopularSportsSection from '../components/Home/PopularSportsSection';
 import HowItWorksSection from '../components/Home/HowItWorksSection';
 import ReviewsSection from '../components/Home/ReviewsSection';
 import WhyChooseUsSection from '../components/Home/WhyChooseUsSection';
+import SportsSlider from '../components/Home/SportsSlider';
 
 const HomePage = () => {
   const [visibleSections, setVisibleSections] = useState(new Set());
@@ -108,7 +109,8 @@ const HomePage = () => {
       {/* Your existing Header component would go here */}
       
       <HeroSection isVisible={isVisible} />
-      <PopularSportsSection isVisible={isVisible} popularSports={popularSports} />
+      {/* <PopularSportsSection isVisible={isVisible} popularSports={popularSports} /> */}
+      <SportsSlider/>
       <HowItWorksSection isVisible={isVisible} />
       <ReviewsSection isVisible={isVisible} reviews={reviews} />
       <WhyChooseUsSection isVisible={isVisible} />

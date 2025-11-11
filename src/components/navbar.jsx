@@ -3,6 +3,9 @@ import { Menu, X, MapPin, Calendar, User, LogIn, UserPlus, ChevronDown, BookOpen
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { Logout } from '../services/operations/auth';
+import { setCityData, updateCity } from '../slices/city';
+
+
 
 // Mock Link component for demo - replace with your actual router Link
 const Link = ({ to, children, className, title, ...props }) => (
@@ -10,6 +13,116 @@ const Link = ({ to, children, className, title, ...props }) => (
     {children}
   </a>
 );
+
+function NavbarWithDropdown() {
+  const dispatch = useDispatch();
+  const { city, data } = useSelector((state) => state.city);
+  const [selectedCity, setSelectedCity] = useState(city);
+  const cities = ["Ahmedabad", "Gandhinagar", "Surat"];
+
+  // ✅ Change selected city and update Redux
+  const handleChange = (e) => {
+    const newCity = e.target.value;
+    setSelectedCity(newCity);
+    if (newCity !== city) {
+      dispatch(updateCity(newCity)); // only update if changed
+    }
+  };
+
+  // ✅ Fetch data only when `city` actually changes
+function NavbarWithDropdown() {
+  const dispatch = useDispatch();
+  const { city, data } = useSelector((state) => state.city);
+  const [selectedCity, setSelectedCity] = useState(city);
+
+  // ✅ Keep track of last fetched city (prevents re-fetch loops)
+  const lastFetchedCity = useRef(null);
+
+  const cities = ["Ahmedabad", "Gandhinagar", "Surat"];
+
+  const handleChange = (e) => {
+    const newCity = e.target.value;
+    setSelectedCity(newCity);
+    if (newCity !== city) {
+      dispatch(updateCity(newCity));
+    }
+  };
+
+  useEffect(() => {
+    // ✅ Only fetch if city actually changed
+    if (!city || lastFetchedCity.current === city) return;
+
+    lastFetchedCity.current = city;
+
+    const fetchCityData = async () => {
+      try {
+        const response = await fetch(
+          `http://localhost:8080/api/locations/sports/by-city?city=${city}`
+        );
+        const responseJson = await response.json();
+        console.log("response",responseJson);
+        const cityData = responseJson.data || [];
+
+        // ✅ Only update Redux if array actually contains items or differs
+        if (JSON.stringify(data) !== JSON.stringify(cityData)) {
+          dispatch(setCityData(cityData));
+        }
+
+        console.log("Fetched once for:", city);
+      } catch (error) {
+        console.error("Error fetching city data:", error);
+      }
+    };
+
+    fetchCityData();
+  }, [city]); // only re-run when city changes
+
+  return (
+    <div className="relative">
+      <div className="flex items-center space-x-2">
+        <MapPin className="h-4 w-4 text-emerald-400" />
+        <select
+          value={selectedCity}
+          onChange={handleChange}
+          className="relative text-gray-300 hover:text-white bg-transparent border border-gray-700 hover:border-gray-600 px-4 py-2 pr-10 rounded-xl text-sm font-medium transition-all duration-300 cursor-pointer appearance-none focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 group"
+        >
+          {cities.map((cityName, index) => (
+            <option key={index} value={cityName} className="bg-gray-800 text-gray-300">
+              {cityName}
+            </option>
+          ))}
+        </select>
+        <ChevronDown className="h-4 w-4 text-gray-400 absolute right-3 pointer-events-none" />
+      </div>
+    </div>
+  );
+}
+  return (
+    <div className="relative">
+      <div className="flex items-center space-x-2">
+        <MapPin className="h-4 w-4 text-emerald-400" />
+        <select
+          value={selectedCity}
+          onChange={handleChange}
+          className="relative text-gray-300 hover:text-white bg-transparent border border-gray-700 hover:border-gray-600 px-4 py-2 pr-10 rounded-xl text-sm font-medium transition-all duration-300 cursor-pointer appearance-none focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 group"
+        >
+          {cities.map((cityName, index) => (
+            <option key={index} value={cityName} className="bg-gray-800 text-gray-300">
+              {cityName}
+            </option>
+          ))}
+        </select>
+        <ChevronDown className="h-4 w-4 text-gray-400 absolute right-3 pointer-events-none" />
+      </div>
+    </div>
+  );
+}
+
+
+
+
+
+
 
 // Profile Dropdown Component
 const ProfileDropDown = ({ user, onLogout }) => {
@@ -47,7 +160,7 @@ const ProfileDropDown = ({ user, onLogout }) => {
               </div>
             </div>
           </div>
-
+        
           {/* Menu Items */}
           <div className="py-2">
             <Link
@@ -186,6 +299,10 @@ const Navbar = () => {
                 <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/0 to-cyan-500/0 group-hover:from-emerald-500/20 group-hover:to-cyan-500/20 rounded-xl transition-all duration-300"></div>
                 <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-emerald-400 to-cyan-400 group-hover:w-full transition-all duration-300"></div>
               </Link>
+
+              <NavbarWithDropdown/>
+                            
+
             </div>
           </div>
 
