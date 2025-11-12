@@ -10,6 +10,7 @@ import Footer from './components/Footer'
 import VerifyEmail from './pages/verify-email'
 import AdminDashboard from './components/admin_dashboard/locations/AdminDashboard'
 import CitySports from './pages/CitySports'
+import FindSports from './pages/FindSports'
 // import Location from './components/admin_dashboard/sports/Location'
 // import Location from './components/admin_dashboard/sports/page/Location'
 
@@ -32,6 +33,7 @@ function App() {
           <Route path="/verify-email" element={<VerifyEmail />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path='/sports/by-city-category' element={<CitySports/>}/>
+          <Route path='/turfs' element={<FindSports/>}/>
           {/* <Route path='location/:id' element={<Location/>}/> */}
         </Routes>
       </div>
