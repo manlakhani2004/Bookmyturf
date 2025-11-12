@@ -146,10 +146,20 @@ export default function CitySports() {
                   <div className="relative h-56 bg-gradient-to-br from-emerald-900/30 to-cyan-900/30 overflow-hidden">
                     {sport.mediaFiles && sport.mediaFiles.length > 0 ? (
                       <img
+<<<<<<< HEAD
         src={`http://localhost:8080/${sport.mediaFiles[0].path.replace(/\\/g, "/")}`}
         alt={sport.name}
           className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
         />
+=======
+                        src={sport.mediaFiles[0].base64Data}
+                        alt={sport.name}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                        }}
+                      />
+>>>>>>> ac2e5a7e9e8ac44cb3809c07ff2655de05c17ef3
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
                         <span className="text-6xl">⚽</span>

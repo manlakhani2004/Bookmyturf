@@ -12,7 +12,7 @@ const LocationCard = ({ location, index }) => {
       <div className="h-48 bg-gradient-to-br from-cyan-400/20 to-purple-500/20 relative overflow-hidden">
         {location.mediaFiles?.length > 0 ? (
           <img 
-            src={location.mediaFiles[0].path}
+            src={location.mediaFiles[0].base64Data}
             alt={location.name}
             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
           />
