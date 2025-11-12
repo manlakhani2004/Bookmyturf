@@ -88,7 +88,14 @@ export function Login(email, password, navigate) {
             //store USER PROFILE DATA and TOKEN in localStorage
             localStorage.setItem("user", JSON.stringify(response.data.Data.user));
             localStorage.setItem("token", JSON.stringify(response.data.Data.token));
+            console.log(response.data.Data.user)
+            if(response.data.Data.user.role == "ADMIN" || response.data.Data.user.role == "SUPERADMIN"  )
+            {
+                navigate('/admin')
+            }else
+            {
             navigate('/');
+            }
         } catch (error) {
             console.log("LOGIN API ERROR............", error)
             toast.error(error.response.data.message);

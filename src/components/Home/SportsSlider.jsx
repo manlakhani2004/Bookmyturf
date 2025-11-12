@@ -2,6 +2,7 @@ import React, { useRef } from "react";
 import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useSelector } from "react-redux";
+import { Link } from "react-router-dom";
 
 const SportsSlider = () => {
   const { city, data } = useSelector((state) => state.city);
@@ -107,15 +108,19 @@ const SportsSlider = () => {
         ref={scrollRef}
         className="flex overflow-x-auto space-x-6 scrollbar-hide scroll-smooth px-8 py-4"
       >
+        {/* http://localhost:8080/api/locations/sports/by-city-category */}
+        {/* http://localhost:8080/api/locations/sports/by-city-category?city=Ahmedabad&categoryName=Football */}
         {sports.map((sport, index) => (
+          <Link to={`/sports/by-city-category?city=${city}&categoryName=${sport.name}`} key={index}>
           <motion.div
-            key={index}
-            className={`min-w-[180px] cursor-pointer group p-6 rounded-2xl bg-gradient-to-br ${sport.gradient} shadow-lg ${sport.shadow} hover:scale-105 transition-transform duration-300 text-center`}
-            whileHover={{ y: -5 }}
+          // key={index}
+          className={`min-w-[180px] cursor-pointer group p-6 rounded-2xl bg-gradient-to-br ${sport.gradient} shadow-lg ${sport.shadow} hover:scale-105 transition-transform duration-300 text-center`}
+          whileHover={{ y: -5 }}
           >
             <div className="text-5xl mb-3">{sport.icon}</div>
             <h3 className="text-white font-semibold text-lg">{sport.name}</h3>
           </motion.div>
+           </Link>
         ))}
       </div>
     </div>

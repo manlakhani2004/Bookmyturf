@@ -40,6 +40,7 @@ function NavbarWithDropdown() {
         const response = await fetch(
           `http://localhost:8080/api/locations/sports/by-city?city=${currentCity}`
         );
+        
 
         if (!response.ok) throw new Error('Failed to fetch city data');
         const responseJson = await response.json();
@@ -66,10 +67,13 @@ function NavbarWithDropdown() {
         onChange={handleChange}
         className="text-gray-300 hover:text-white bg-transparent border border-gray-700 hover:border-gray-600 px-4 py-2 pr-10 rounded-xl text-sm font-medium transition-all duration-300 cursor-pointer appearance-none focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500"
       >
+
         {cities.map((cityName, index) => (
+    
           <option key={index} value={cityName} className="bg-gray-800 text-gray-300">
             {cityName}
           </option>
+    
         ))}
       </select>
       <ChevronDown className="h-4 w-4 text-gray-400 absolute right-3 pointer-events-none" />
