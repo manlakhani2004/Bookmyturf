@@ -146,7 +146,7 @@ export default function CitySports() {
                   <div className="relative h-56 bg-gradient-to-br from-emerald-900/30 to-cyan-900/30 overflow-hidden">
                     {sport.mediaFiles && sport.mediaFiles.length > 0 ? (
                       <img
-                        src={`http://localhost:8080/${sport.mediaFiles[0].path.replace(/\\/g, '/')}`}
+                        src={sport.mediaFiles[0].base64Data}
                         alt={sport.name}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                         onError={(e) => {
