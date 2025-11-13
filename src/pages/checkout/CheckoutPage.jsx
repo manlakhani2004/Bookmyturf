@@ -26,6 +26,7 @@ const CheckoutPage = () => {
   const [success, setSuccess] = useState(null);
   const [timeRemaining, setTimeRemaining] = useState(null);
   const [isExpired, setIsExpired] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState("UPI"); // ✅ added
 
   // --- Create booking on mount ---
   useEffect(() => {
@@ -51,9 +52,13 @@ const CheckoutPage = () => {
         setTimeRemaining("00:00");
         clearInterval(interval);
       } else {
-        const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+        const minutes = Math.floor(
+          (difference % (1000 * 60 * 60)) / (1000 * 60)
+        );
         const seconds = Math.floor((difference % (1000 * 60)) / 1000);
-        setTimeRemaining(`${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`);
+        setTimeRemaining(
+          `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`
+        );
       }
     }, 1000);
 
@@ -70,6 +75,7 @@ const CheckoutPage = () => {
         setLoading(false);
         return;
       }
+      const cleanToken = token.replace(/^"|"$/g, "");
 
       // ✅ Send only the selectedSlotIds array as body
       const res = await axios.post(
@@ -77,7 +83,7 @@ const CheckoutPage = () => {
         selectedSlotIds, // 👈 only array
         {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${cleanToken}`,
             "Content-Type": "application/json",
           },
         }
@@ -89,7 +95,9 @@ const CheckoutPage = () => {
         setError(res.data.Message || "Failed to create booking");
       }
     } catch (err) {
-      setError(err.response?.data?.Message || err.message || "Failed to create booking.");
+      setError(
+        err.response?.data?.Message || err.message || "Failed to create booking."
+      );
     } finally {
       setLoading(false);
     }
@@ -100,10 +108,11 @@ const CheckoutPage = () => {
     try {
       setActionLoading(true);
       const token = localStorage.getItem("token");
+      const cleanToken = token.replace(/^"|"$/g, "");
       await axios.post(
         `http://localhost:8080/api/bookings/confirm/${booking.id}`,
         {},
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${cleanToken}` } }
       );
       setSuccess("Booking confirmed successfully! Redirecting...");
       setTimeout(() => navigate("/bookings"), 2000);
@@ -119,10 +128,11 @@ const CheckoutPage = () => {
     try {
       setActionLoading(true);
       const token = localStorage.getItem("token");
+      const cleanToken = token.replace(/^"|"$/g, "");
       await axios.post(
         `http://localhost:8080/api/bookings/cancel/${booking.id}`,
         {},
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${cleanToken}` } }
       );
       setSuccess("Booking cancelled successfully! Redirecting...");
       setTimeout(() => navigate("/"), 2000);
@@ -146,13 +156,92 @@ const CheckoutPage = () => {
           timeRemaining={timeRemaining}
           navigate={navigate}
         />
+
+        {/* ✅ Booking Details Section */}
+        {booking && (
+          <div className="bg-gray-800 rounded-2xl p-6 shadow-lg mb-6">
+            <h2 className="text-xl font-semibold text-white mb-4">
+              Booking Details
+            </h2>
+
+            <div className="text-gray-300 space-y-2">
+              <p>
+                <span className="font-semibold text-white">Booking ID:</span>{" "}
+                {booking.id}
+              </p>
+              <p>
+                <span className="font-semibold text-white">Status:</span>{" "}
+                {booking.status}
+              </p>
+              <p>
+                <span className="font-semibold text-white">Slots Selected:</span>{" "}
+                {selectedSlotIds.length}
+              </p>
+              <p>
+                <span className="font-semibold text-white">Total Amount:</span>{" "}
+                ₹{booking.totalAmount}
+              </p>
+              <p>
+                <span className="font-semibold text-white">Expires At:</span>{" "}
+                {new Date(booking.expiresAt).toLocaleTimeString()}
+              </p>
+            </div>
+
+            {/* ✅ Payment Method Selection */}
+            <div className="mt-4">
+              <label className="text-white font-semibold">
+                Payment Method:
+              </label>
+              <div className="flex gap-4 mt-2">
+                <button
+                  className={`px-4 py-2 rounded-lg ${
+                    paymentMethod === "UPI"
+                      ? "bg-emerald-600 text-white"
+                      : "bg-gray-700 text-gray-300"
+                  }`}
+                  onClick={() => setPaymentMethod("UPI")}
+                >
+                  UPI
+                </button>
+                <button
+                  className={`px-4 py-2 rounded-lg ${
+                    paymentMethod === "Cash"
+                      ? "bg-emerald-600 text-white"
+                      : "bg-gray-700 text-gray-300"
+                  }`}
+                  onClick={() => setPaymentMethod("Cash")}
+                >
+                  Cash
+                </button>
+              </div>
+
+              {paymentMethod === "UPI" && (
+                <div className="mt-4 text-sm text-gray-400">
+                  <p>
+                    💳 Use UPI ID: <b>bookmyturf@upi</b>
+                  </p>
+                  <p>Complete payment before confirmation.</p>
+                </div>
+              )}
+
+              {paymentMethod === "Cash" && (
+                <div className="mt-4 text-sm text-gray-400">
+                  <p>💵 Pay directly at the turf counter during arrival.</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         <BookingSummary booking={booking} />
+
         <ActionButtons
           handleConfirm={handleConfirm}
           handleCancel={handleCancel}
           isExpired={isExpired}
           actionLoading={actionLoading}
         />
+
         <AnimatePresence>
           <StatusMessage success={success} error={error} booking={booking} />
         </AnimatePresence>
