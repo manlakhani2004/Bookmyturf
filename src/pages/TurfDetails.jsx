@@ -21,12 +21,16 @@ const TurfDetails = () => {
   const fetchTurfDetails = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`http://localhost:8080/api/locations/sports/${id}/details`);
+      const response = await fetch(
+        `http://localhost:8080/api/locations/sports/${id}/details`
+      );
       const result = await response.json();
 
       if (result.Status === "OK" && result.Data) {
         setTurfData(result.Data);
-        const todayName = new Date().toLocaleDateString("en-US", { weekday: "long" }).toUpperCase();
+        const todayName = new Date()
+          .toLocaleDateString("en-US", { weekday: "long" })
+          .toUpperCase();
         setSelectedDay(todayName);
       } else {
         setError(result.Message || "Failed to fetch turf details");
@@ -39,9 +43,10 @@ const TurfDetails = () => {
   };
 
   const handleSlotSelect = (slot, date) => {
-    // ✅ Validation: user can select slots from only one date
     if (selectedSlots.length > 0 && selectedDate && selectedDate !== date) {
-      alert("You can select slots for one day only. Please clear your previous selections first.");
+      alert(
+        "You can select slots for one day only. Please clear your previous selections first."
+      );
       return;
     }
 
@@ -56,17 +61,19 @@ const TurfDetails = () => {
     if (exists) {
       updatedSlots = selectedSlots.filter(
         (s) =>
-          !(s.dayOfWeek === slot.dayOfWeek && s.startTime === slot.startTime && s.endTime === slot.endTime)
+          !(
+            s.dayOfWeek === slot.dayOfWeek &&
+            s.startTime === slot.startTime &&
+            s.endTime === slot.endTime
+          )
       );
     } else {
       updatedSlots = [...selectedSlots, { ...slot, date }];
-      if (!selectedDate) setSelectedDate(date); // store current selected date
+      if (!selectedDate) setSelectedDate(date);
     }
 
     setSelectedSlots(updatedSlots);
     setTotalAmount(updatedSlots.reduce((acc, s) => acc + s.price, 0));
-
-    // ✅ If all slots deselected, clear selected date
     if (updatedSlots.length === 0) setSelectedDate(null);
   };
 
@@ -109,16 +116,21 @@ const TurfDetails = () => {
   const selectedDayData = allDays.find((d) => d.day === selectedDay);
   const slotsForDay = selectedDayData?.slots || [];
 
-  // ✅ Group slots by time of day
   const groupedSlots = {
     Morning: slotsForDay.filter((s) => parseInt(s.startTime.split(":")[0]) < 12),
     Afternoon: slotsForDay.filter(
-      (s) => parseInt(s.startTime.split(":")[0]) >= 12 && parseInt(s.startTime.split(":")[0]) < 17
+      (s) =>
+        parseInt(s.startTime.split(":")[0]) >= 12 &&
+        parseInt(s.startTime.split(":")[0]) < 17
     ),
     Evening: slotsForDay.filter(
-      (s) => parseInt(s.startTime.split(":")[0]) >= 17 && parseInt(s.startTime.split(":")[0]) < 21
+      (s) =>
+        parseInt(s.startTime.split(":")[0]) >= 17 &&
+        parseInt(s.startTime.split(":")[0]) < 21
     ),
-    Night: slotsForDay.filter((s) => parseInt(s.startTime.split(":")[0]) >= 21),
+    Night: slotsForDay.filter(
+      (s) => parseInt(s.startTime.split(":")[0]) >= 21
+    ),
   };
 
   const mediaFiles = turfData.mediaFiles || [];
@@ -140,7 +152,7 @@ const TurfDetails = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-slate-900 to-gray-800 pt-24">
       <div className="max-w-6xl mx-auto px-4 py-8">
-        {/* HEADER WITH IMAGE SLIDER */}
+        {/* HEADER */}
         <div className="flex flex-col lg:flex-row gap-8">
           <div className="relative w-full lg:w-1/2">
             <AnimatePresence mode="wait">
@@ -155,7 +167,6 @@ const TurfDetails = () => {
                 transition={{ duration: 0.5 }}
               />
             </AnimatePresence>
-
             {mediaFiles.length > 1 && (
               <>
                 <button
@@ -177,8 +188,12 @@ const TurfDetails = () => {
           <div className="w-full lg:w-1/2 text-white space-y-3">
             <h1 className="text-4xl font-bold">{turfData.name}</h1>
             <p className="text-gray-400">{turfData.description}</p>
-            <p className="text-emerald-400 font-semibold">{turfData.locationName}</p>
-            <p className="text-sm text-gray-400">Category: {turfData.categoryName}</p>
+            <p className="text-emerald-400 font-semibold">
+              {turfData.locationName}
+            </p>
+            <p className="text-sm text-gray-400">
+              Category: {turfData.categoryName}
+            </p>
           </div>
         </div>
 
@@ -194,7 +209,12 @@ const TurfDetails = () => {
                   : "bg-slate-800 border-slate-700 text-gray-300 hover:bg-slate-700"
               } transition`}
             >
-              <span className="font-bold">{new Date(day.date).toLocaleDateString("en-GB", { day: "2-digit", month: "short" })}</span>
+              <span className="font-bold">
+                {new Date(day.date).toLocaleDateString("en-GB", {
+                  day: "2-digit",
+                  month: "short",
+                })}
+              </span>
               <span className="text-sm">{day.day.slice(0, 3)}</span>
             </button>
           ))}
@@ -214,28 +234,42 @@ const TurfDetails = () => {
             Object.entries(groupedSlots).map(([period, slots]) =>
               slots.length > 0 ? (
                 <div key={period} className="mb-6">
-                  <h3 className="text-xl text-emerald-400 font-semibold mb-3">{period}</h3>
+                  <h3 className="text-xl text-emerald-400 font-semibold mb-3">
+                    {period}
+                  </h3>
                   <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {slots.map((slot, idx) => (
-                      <motion.div
-                        key={idx}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={() => handleSlotSelect(slot, selectedDayData.date)}
-                        className={`p-4 rounded-xl border-2 cursor-pointer transition ${
-                          isSlotSelected(slot)
-                            ? "border-emerald-500 bg-emerald-500/20"
-                            : "border-slate-700 bg-slate-800 hover:border-emerald-400"
-                        }`}
-                      >
-                        <div className="flex justify-between items-center mb-2">
-                          <span className="text-gray-200 font-semibold">
-                            {slot.startTime} - {slot.endTime}
-                          </span>
-                          <span className="text-emerald-400 font-bold">₹{slot.price}</span>
-                        </div>
-                        <p className="text-sm text-gray-400">Tap to select</p>
-                      </motion.div>
-                    ))}
+                    {slots.map((slot, idx) => {
+                      const isDisabled = slot.status !== "AVAILABLE";
+                      return (
+                        <motion.div
+                          key={idx}
+                          whileTap={{ scale: isDisabled ? 1 : 0.95 }}
+                          onClick={() =>
+                            !isDisabled &&
+                            handleSlotSelect(slot, selectedDayData.date)
+                          }
+                          className={`p-4 rounded-xl border-2 transition ${
+                            isDisabled
+                              ? "bg-gray-700 border-gray-600 cursor-not-allowed opacity-50"
+                              : isSlotSelected(slot)
+                              ? "border-emerald-500 bg-emerald-500/20 cursor-pointer"
+                              : "border-slate-700 bg-slate-800 hover:border-emerald-400 cursor-pointer"
+                          }`}
+                        >
+                          <div className="flex justify-between items-center mb-2">
+                            <span className="text-gray-200 font-semibold">
+                              {slot.startTime} - {slot.endTime}
+                            </span>
+                            <span className="text-emerald-400 font-bold">
+                              ₹{slot.price}
+                            </span>
+                          </div>
+                          <p className="text-sm text-gray-400">
+                            {isDisabled ? "Unavailable" : "Tap to select"}
+                          </p>
+                        </motion.div>
+                      );
+                    })}
                   </div>
                 </div>
               ) : null
@@ -254,7 +288,9 @@ const TurfDetails = () => {
               <p className="text-white text-lg font-semibold">
                 Selected Slots: {selectedSlots.length}
               </p>
-              <p className="text-emerald-400 text-2xl font-bold">Total: ₹{totalAmount}</p>
+              <p className="text-emerald-400 text-2xl font-bold">
+                Total: ₹{totalAmount}
+              </p>
               <button
                 onClick={() => alert("Proceed to Booking")}
                 className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg"
