@@ -39,7 +39,7 @@ function App() {
           <Route path='/turfs' element={<FindSports/>}/>
           <Route path='/turfdetails/:id' element={<TurfDetails/>}/>
           <Route path='/location/:locationID' element={<LocationCategory/> }/>
-          <Route path='/checkout' element={<CheckoutPage/>}/>
+          <Route path='/checkout/:turfId' element={<CheckoutPage/>}/>
           {/* <Route path='location/:id' element={<Location/>}/> */}
         </Routes>
       </div>

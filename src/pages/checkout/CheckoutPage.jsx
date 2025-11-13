@@ -1,13 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { AnimatePresence } from "framer-motion";
-import {
-  Loader2,
-  CheckCircle,
-  XCircle,
-  AlertTriangle,
-} from "lucide-react";
+import { useSelector } from "react-redux";
 
 import LoaderScreen from "./components/LoaderScreen";
 import ErrorScreen from "./components/ErrorScreen";
@@ -17,9 +12,12 @@ import ActionButtons from "./components/ActionButtons";
 import StatusMessage from "./components/StatusMessage";
 
 const CheckoutPage = () => {
-  const location = useLocation();
   const navigate = useNavigate();
-  const { selectedSlotIds } = location.state || {};
+
+  // ✅ Get selectedSlotIds directly from Redux
+  const selectedSlotIds = useSelector(
+    (state) => state.selectedSlotIds.selectedSlotIds
+  );
 
   const [booking, setBooking] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -73,12 +71,23 @@ const CheckoutPage = () => {
         return;
       }
 
-      const res = await axios.post("http://localhost:8080/api/bookings/create", selectedSlotIds, {
-        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-      });
+      // ✅ Send only the selectedSlotIds array as body
+      const res = await axios.post(
+        "http://localhost:8080/api/bookings/create",
+        selectedSlotIds, // 👈 only array
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
-      if (res.data.Status === "OK") setBooking(res.data.Data);
-      else setError(res.data.Message || "Failed to create booking");
+      if (res.data.Status === "OK") {
+        setBooking(res.data.Data);
+      } else {
+        setError(res.data.Message || "Failed to create booking");
+      }
     } catch (err) {
       setError(err.response?.data?.Message || err.message || "Failed to create booking.");
     } finally {
@@ -91,9 +100,11 @@ const CheckoutPage = () => {
     try {
       setActionLoading(true);
       const token = localStorage.getItem("token");
-      await axios.post(`http://localhost:8080/api/bookings/confirm/${booking.id}`, {}, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await axios.post(
+        `http://localhost:8080/api/bookings/confirm/${booking.id}`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
       setSuccess("Booking confirmed successfully! Redirecting...");
       setTimeout(() => navigate("/bookings"), 2000);
     } catch (err) {
@@ -108,9 +119,11 @@ const CheckoutPage = () => {
     try {
       setActionLoading(true);
       const token = localStorage.getItem("token");
-      await axios.post(`http://localhost:8080/api/bookings/cancel/${booking.id}`, {}, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await axios.post(
+        `http://localhost:8080/api/bookings/cancel/${booking.id}`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
       setSuccess("Booking cancelled successfully! Redirecting...");
       setTimeout(() => navigate("/"), 2000);
     } catch (err) {
@@ -122,12 +135,17 @@ const CheckoutPage = () => {
 
   // --- Loading / Error State ---
   if (loading) return <LoaderScreen />;
-  if (error && !booking) return <ErrorScreen message={error} onBack={() => navigate(-1)} />;
+  if (error && !booking)
+    return <ErrorScreen message={error} onBack={() => navigate(-1)} />;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 py-8 px-4">
       <div className="max-w-3xl mx-auto">
-        <CountdownTimer isExpired={isExpired} timeRemaining={timeRemaining} navigate={navigate} />
+        <CountdownTimer
+          isExpired={isExpired}
+          timeRemaining={timeRemaining}
+          navigate={navigate}
+        />
         <BookingSummary booking={booking} />
         <ActionButtons
           handleConfirm={handleConfirm}
