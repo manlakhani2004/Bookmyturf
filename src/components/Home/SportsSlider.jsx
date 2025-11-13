@@ -103,24 +103,23 @@ const SportsSlider = () => {
         <ChevronRight className="text-white" />
       </button>
 
-      {/* Sports Slider */}
+      {/* Sports Grid - 2 items per row with 75% width and increased height */}
       <div
         ref={scrollRef}
-        className="flex overflow-x-auto space-x-6 scrollbar-hide scroll-smooth px-8 py-4"
+        className="grid grid-cols-2 gap-6 px-8 py-4 overflow-x-auto scroll-smooth"
       >
         {/* http://localhost:8080/api/locations/sports/by-city-category */}
         {/* http://localhost:8080/api/locations/sports/by-city-category?city=Ahmedabad&categoryName=Football */}
         {sports.map((sport, index) => (
-          <Link to={`/sports/by-city-category?city=${city}&categoryName=${sport.name}`} key={index}>
-          <motion.div
-          // key={index}
-          className={`min-w-[180px] cursor-pointer group p-6 rounded-2xl bg-gradient-to-br ${sport.gradient} shadow-lg ${sport.shadow} hover:scale-105 transition-transform duration-300 text-center`}
-          whileHover={{ y: -5 }}
-          >
-            <div className="text-5xl mb-3">{sport.icon}</div>
-            <h3 className="text-white font-semibold text-lg">{sport.name}</h3>
-          </motion.div>
-           </Link>
+          <Link to={`/sports/by-city-category?city=${city}&categoryName=${sport.name}`} key={index} className="flex justify-center">
+            <motion.div
+              className={`w-3/4 cursor-pointer group p-10 rounded-2xl bg-gradient-to-br ${sport.gradient} shadow-lg ${sport.shadow} hover:scale-105 transition-transform duration-300 text-center h-52`}
+              whileHover={{ y: -5 }}
+            >
+              <div className="text-6xl mb-4">{sport.icon}</div>
+              <h3 className="text-white font-semibold text-xl">{sport.name}</h3>
+            </motion.div>
+          </Link>
         ))}
       </div>
     </div>

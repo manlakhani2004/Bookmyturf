@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { MapPin, Calendar, Star, Clock, ArrowRight } from 'lucide-react';
- import { useSearchParams } from "react-router-dom";
+ import { Link, useSearchParams } from "react-router-dom";
 import { useSelector } from 'react-redux';
 
 export default function CitySports() {
@@ -137,6 +137,7 @@ export default function CitySports() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {sportsData.map((sport) => (
+              <Link to={`/turfdetails/${sport?.id}`}>
               <div
                 key={sport.id}
                 className="group relative bg-gradient-to-br from-emerald-500/10 to-cyan-500/10 rounded-3xl p-[2px] hover:from-emerald-500/20 hover:to-cyan-500/20 transition-all duration-500"
@@ -200,6 +201,7 @@ export default function CitySports() {
                   </div>
                 </div>
               </div>
+              </Link>
             ))}
           </div>
         )}
