@@ -115,7 +115,7 @@ const CheckoutPage = () => {
         { headers: { Authorization: `Bearer ${cleanToken}` } }
       );
       setSuccess("Booking confirmed successfully! Redirecting...");
-      setTimeout(() => navigate("/bookings"), 2000);
+      setTimeout(() => navigate("/"), 1000);
     } catch (err) {
       setError(err.response?.data?.Message || "Failed to confirm booking.");
     } finally {
@@ -135,7 +135,7 @@ const CheckoutPage = () => {
         { headers: { Authorization: `Bearer ${cleanToken}` } }
       );
       setSuccess("Booking cancelled successfully! Redirecting...");
-      setTimeout(() => navigate("/"), 2000);
+      setTimeout(() => navigate("/turfs"), 1000);
     } catch (err) {
       setError(err.response?.data?.Message || "Failed to cancel booking.");
     } finally {
