@@ -13,7 +13,7 @@ export default function BookingSummary({ booking }) {
             <Calendar className="w-5 h-5 text-emerald-500" />
             <span className="text-gray-300">Number of Slots</span>
           </div>
-          <span className="text-white font-semibold">{booking?.bookingSlots?.length || 0}</span>
+          <span className="text-white font-semibold">{booking?.slots?.length || 0} </span>
         </div>
 
         <div className="flex justify-between items-center">
