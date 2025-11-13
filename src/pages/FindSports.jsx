@@ -9,6 +9,7 @@ import {
   Star,
 } from "lucide-react";
 import { useSelector } from "react-redux";
+import { Link } from "react-router-dom";
 
 export default function FindSports() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -325,6 +326,7 @@ export default function FindSports() {
           ) : (
             <div className="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-6">
               {sportsData.map((sport) => (
+                <Link to={`/turfdetails/${sport?.id}`}>
                 <div
                   key={sport.id}
                   className="group bg-gradient-to-br from-emerald-500/10 to-cyan-500/10 p-[2px] rounded-2xl hover:from-emerald-500/20 hover:to-cyan-500/20 transition-all"
@@ -369,6 +371,7 @@ export default function FindSports() {
                     </div>
                   </div>
                 </div>
+                </Link>
               ))}
             </div>
           )}
