@@ -1,18 +1,18 @@
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useParams } from 'react-router-dom';
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useParams } from "react-router-dom";
 
 const TurfDetails = () => {
-  // For demo purposes, using ID from URL or default to 5
-  const {id} = useParams();
+  const { id } = useParams();
 
- 
   const [turfData, setTurfData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [expandedDays, setExpandedDays] = useState({});
-  const [maxPrice, setMaxPrice] = useState(1000);
-  const [priceFilter, setPriceFilter] = useState(1000);
+  const [selectedDay, setSelectedDay] = useState(null);
+  const [selectedSlots, setSelectedSlots] = useState([]);
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [totalAmount, setTotalAmount] = useState(0);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   useEffect(() => {
     fetchTurfDetails();
@@ -21,95 +21,73 @@ const TurfDetails = () => {
   const fetchTurfDetails = async () => {
     try {
       setLoading(true);
-      
-      // Real API call - uncomment to use
-    //   http://localhost:8080/api/locations/sports/5/details
-    console.log(id);
-      const response = await fetch(`http://localhost:8080/api/locations/sports/${id}/details`);
+      const response = await fetch(
+        `http://localhost:8080/api/locations/sports/${id}/details`
+      );
       const result = await response.json();
-      console.log(result);
-      if (result.Status === 'OK' && result.Data) {
+
+      if (result.Status === "OK" && result.Data) {
         setTurfData(result.Data);
-        const max = Math.max(...result.Data.slotTimings.map(s => s.price));
-        setMaxPrice(max);
-        setPriceFilter(max);
+        const todayName = new Date()
+          .toLocaleDateString("en-US", { weekday: "long" })
+          .toUpperCase();
+        setSelectedDay(todayName);
       } else {
-        setError(result.Message || 'Failed to fetch turf details');
+        setError(result.Message || "Failed to fetch turf details");
       }
-      setLoading(false);
-      
-      
-      // Static data for demo
-    //   setTimeout(() => {
-    //     const staticData = {
-    //       id: 5,
-    //       name: "Cricket Turf A",
-    //       description: "Premium cricket turf with flood lights and changing rooms.",
-    //       categoryName: "Cricket",
-    //       locationName: "Ahmedabad Sports Arena",
-    //       mediaFiles: [
-    //         {
-    //           fileType: "image",
-    //           base64Data: "https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=800"
-    //         }
-    //       ],
-    //       slotTimings: [
-    //         { dayOfWeek: "MONDAY", startTime: "06:00", endTime: "07:00", price: 500 },
-    //         { dayOfWeek: "MONDAY", startTime: "07:00", endTime: "08:00", price: 600 },
-    //         { dayOfWeek: "MONDAY", startTime: "18:00", endTime: "19:00", price: 750 },
-    //         { dayOfWeek: "TUESDAY", startTime: "06:00", endTime: "07:00", price: 500 },
-    //         { dayOfWeek: "TUESDAY", startTime: "19:00", endTime: "20:00", price: 800 },
-    //         { dayOfWeek: "WEDNESDAY", startTime: "07:00", endTime: "08:00", price: 600 },
-    //         { dayOfWeek: "WEDNESDAY", startTime: "18:00", endTime: "19:00", price: 750 },
-    //         { dayOfWeek: "THURSDAY", startTime: "06:00", endTime: "07:00", price: 500 },
-    //         { dayOfWeek: "FRIDAY", startTime: "17:00", endTime: "18:00", price: 700 },
-    //         { dayOfWeek: "FRIDAY", startTime: "18:00", endTime: "19:00", price: 850 },
-    //         { dayOfWeek: "SATURDAY", startTime: "08:00", endTime: "09:00", price: 900 },
-    //         { dayOfWeek: "SATURDAY", startTime: "18:00", endTime: "19:00", price: 950 },
-    //         { dayOfWeek: "SUNDAY", startTime: "07:00", endTime: "08:00", price: 850 },
-    //         { dayOfWeek: "SUNDAY", startTime: "18:00", endTime: "19:00", price: 1000 }
-    //       ]
-    //     };
-        
-    //     setTurfData(staticData);
-    //     const max = Math.max(...staticData.slotTimings.map(s => s.price));
-    //     setMaxPrice(max);
-    //     setPriceFilter(max);
-    //     setLoading(false);
-    //   }, 1000);
-      
     } catch (err) {
-      setError(err.message || 'Failed to fetch turf details');
+      setError(err.message || "Failed to fetch turf details");
+    } finally {
       setLoading(false);
     }
   };
 
-  const toggleDay = (day) => {
-    setExpandedDays(prev => ({ ...prev, [day]: !prev[day] }));
-  };
-
-  const groupSlotsByDay = () => {
-    if (!turfData?.slotTimings) return {};
-    
-    const days = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'];
-    const grouped = {};
-    
-    days.forEach(day => {
-      grouped[day] = turfData.slotTimings.filter(
-        slot => slot.dayOfWeek === day && slot.price <= priceFilter
+  const handleSlotSelect = (slot, date) => {
+    if (selectedSlots.length > 0 && selectedDate && selectedDate !== date) {
+      alert(
+        "You can select slots for one day only. Please clear your previous selections first."
       );
-    });
-    
-    return grouped;
+      return;
+    }
+
+    const exists = selectedSlots.find(
+      (s) =>
+        s.dayOfWeek === slot.dayOfWeek &&
+        s.startTime === slot.startTime &&
+        s.endTime === slot.endTime
+    );
+
+    let updatedSlots;
+    if (exists) {
+      updatedSlots = selectedSlots.filter(
+        (s) =>
+          !(
+            s.dayOfWeek === slot.dayOfWeek &&
+            s.startTime === slot.startTime &&
+            s.endTime === slot.endTime
+          )
+      );
+    } else {
+      updatedSlots = [...selectedSlots, { ...slot, date }];
+      if (!selectedDate) setSelectedDate(date);
+    }
+
+    setSelectedSlots(updatedSlots);
+    setTotalAmount(updatedSlots.reduce((acc, s) => acc + s.price, 0));
+    if (updatedSlots.length === 0) setSelectedDate(null);
   };
 
-  const goBack = () => {
-    window.history.back();
-  };
+  const isSlotSelected = (slot) =>
+    selectedSlots.some(
+      (s) =>
+        s.dayOfWeek === slot.dayOfWeek &&
+        s.startTime === slot.startTime &&
+        s.endTime === slot.endTime
+    );
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-slate-900 to-gray-800 flex items-center justify-center">
+      <div className="min-h-screen flex justify-center items-center bg-gray-900">
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
@@ -121,206 +99,207 @@ const TurfDetails = () => {
 
   if (error || !turfData) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-slate-900 to-gray-800 flex items-center justify-center p-4">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-slate-800 border border-slate-700 rounded-2xl shadow-2xl p-8 max-w-md w-full text-center"
+      <div className="min-h-screen bg-gray-900 flex flex-col justify-center items-center text-center">
+        <h2 className="text-3xl text-white font-bold mb-2">😔 Oops!</h2>
+        <p className="text-gray-400 mb-4">{error || "No data found"}</p>
+        <button
+          onClick={() => window.history.back()}
+          className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-lg"
         >
-          <div className="text-6xl mb-4">😔</div>
-          <h2 className="text-2xl font-bold text-white mb-2">Oops!</h2>
-          <p className="text-gray-400 mb-6">{error || 'No data found'}</p>
-          <button
-            onClick={goBack}
-            className="px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition shadow-lg shadow-emerald-500/20"
-          >
-            Go Back
-          </button>
-        </motion.div>
+          Go Back
+        </button>
       </div>
     );
   }
 
-  const slotsByDay = groupSlotsByDay();
-  
-  // Handle both base64 and URL images
-  const getImageUrl = () => {
-    if (!turfData.mediaFiles?.[0]?.base64Data) {
-      return 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=800';
-    }
-    
-    const imageData = turfData.mediaFiles[0].base64Data;
-    
-    // If it's already a complete data URL or regular URL, use it directly
-    if (imageData.startsWith('data:') || imageData.startsWith('http')) {
-      return imageData;
-    }
-    
-    // If it's base64 without the data URL prefix, add it
-    return `data:image/jpeg;base64,${imageData}`;
+  const allDays = turfData.weekSlots || [];
+  const selectedDayData = allDays.find((d) => d.day === selectedDay);
+  const slotsForDay = selectedDayData?.slots || [];
+
+  const groupedSlots = {
+    Morning: slotsForDay.filter((s) => parseInt(s.startTime.split(":")[0]) < 12),
+    Afternoon: slotsForDay.filter(
+      (s) =>
+        parseInt(s.startTime.split(":")[0]) >= 12 &&
+        parseInt(s.startTime.split(":")[0]) < 17
+    ),
+    Evening: slotsForDay.filter(
+      (s) =>
+        parseInt(s.startTime.split(":")[0]) >= 17 &&
+        parseInt(s.startTime.split(":")[0]) < 21
+    ),
+    Night: slotsForDay.filter(
+      (s) => parseInt(s.startTime.split(":")[0]) >= 21
+    ),
   };
-  
-  const imageUrl = getImageUrl();
+
+  const mediaFiles = turfData.mediaFiles || [];
+  const currentImage =
+    mediaFiles.length > 0
+      ? mediaFiles[currentImageIndex]?.base64Data?.startsWith("http") ||
+        mediaFiles[currentImageIndex]?.base64Data?.startsWith("data:")
+        ? mediaFiles[currentImageIndex].base64Data
+        : `data:image/jpeg;base64,${mediaFiles[currentImageIndex].base64Data}`
+      : "https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=800";
+
+  const nextImage = () =>
+    setCurrentImageIndex((prev) => (prev + 1) % mediaFiles.length);
+  const prevImage = () =>
+    setCurrentImageIndex((prev) =>
+      prev === 0 ? mediaFiles.length - 1 : prev - 1
+    );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-slate-900 to-gray-800">
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <motion.button
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          onClick={goBack}
-          className="mb-6 px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg shadow-lg hover:shadow-xl hover:bg-slate-700 transition flex items-center gap-2 text-gray-300 hover:text-emerald-400"
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-          Back
-        </motion.button>
-
-        <div className="grid lg:grid-cols-2 gap-8">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5 }}
-            className="relative"
-          >
-            <div className="rounded-2xl overflow-hidden shadow-2xl h-96 lg:h-full border border-slate-700">
-              <img
-                src={imageUrl}
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-slate-900 to-gray-800 pt-24">
+      <div className="max-w-6xl mx-auto px-4 py-8">
+        {/* HEADER */}
+        <div className="flex flex-col lg:flex-row gap-8">
+          <div className="relative w-full lg:w-1/2">
+            <AnimatePresence mode="wait">
+              <motion.img
+                key={currentImage}
+                src={currentImage}
                 alt={turfData.name}
-                className="w-full h-full object-cover"
+                className="rounded-2xl shadow-2xl w-full h-96 object-cover border border-slate-700"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.5 }}
               />
-              <div className="absolute top-4 right-4 bg-slate-900/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg border border-emerald-500/30">
-                <span className="text-emerald-400 font-semibold">{turfData.categoryName}</span>
-              </div>
-            </div>
-          </motion.div>
+            </AnimatePresence>
+            {mediaFiles.length > 1 && (
+              <>
+                <button
+                  onClick={prevImage}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 bg-black/40 text-white px-3 py-1 rounded-full"
+                >
+                  ‹
+                </button>
+                <button
+                  onClick={nextImage}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 bg-black/40 text-white px-3 py-1 rounded-full"
+                >
+                  ›
+                </button>
+              </>
+            )}
+          </div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="space-y-6"
-          >
-            <div className="bg-slate-800 border border-slate-700 rounded-2xl shadow-2xl p-8">
-              <h1 className="text-4xl font-bold text-white mb-3">{turfData.name}</h1>
-              <div className="flex items-center gap-2 text-gray-400 mb-4">
-                <svg className="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-                <span className="font-medium">{turfData.locationName}</span>
-              </div>
-              <p className="text-gray-300 leading-relaxed">{turfData.description}</p>
-            </div>
-
-            <div className="bg-slate-800 border border-slate-700 rounded-2xl shadow-2xl p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-white">Price Filter</h3>
-                <span className="text-2xl font-bold text-emerald-400">₹{priceFilter}</span>
-              </div>
-              <input
-                type="range"
-                min="0"
-                max={maxPrice}
-                step="50"
-                value={priceFilter}
-                onChange={(e) => setPriceFilter(Number(e.target.value))}
-                className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-500"
-              />
-              <div className="flex justify-between text-sm text-gray-500 mt-2">
-                <span>₹0</span>
-                <span>₹{maxPrice}</span>
-              </div>
-            </div>
-          </motion.div>
+          <div className="w-full lg:w-1/2 text-white space-y-3">
+            <h1 className="text-4xl font-bold">{turfData.name}</h1>
+            <p className="text-gray-400">{turfData.description}</p>
+            <p className="text-emerald-400 font-semibold">
+              {turfData.locationName}
+            </p>
+            <p className="text-sm text-gray-400">
+              Category: {turfData.categoryName}
+            </p>
+          </div>
         </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="mt-8"
-        >
-          <h2 className="text-3xl font-bold text-white mb-6">Available Slots</h2>
-          <div className="space-y-4">
-            {Object.entries(slotsByDay).map(([day, slots]) => (
-              <motion.div
-                key={day}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="bg-slate-800 border border-slate-700 rounded-xl shadow-xl overflow-hidden"
-              >
-                <button
-                  onClick={() => toggleDay(day)}
-                  className="w-full px-6 py-4 flex items-center justify-between hover:bg-slate-700 transition"
-                >
-                  <div className="flex items-center gap-3">
-                    <span className="text-lg font-semibold text-white capitalize">
-                      {day.toLowerCase()}
-                    </span>
-                    <span className="px-3 py-1 bg-emerald-500/20 text-emerald-400 rounded-full text-sm font-medium border border-emerald-500/30">
-                      {slots.length} slots
-                    </span>
-                  </div>
-                  <motion.svg
-                    animate={{ rotate: expandedDays[day] ? 180 : 0 }}
-                    transition={{ duration: 0.3 }}
-                    className="w-5 h-5 text-gray-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </motion.svg>
-                </button>
+        {/* DATE NAVBAR */}
+        <div className="flex overflow-x-auto gap-3 mt-8 pb-3 border-b border-slate-700 scrollbar-hide">
+          {allDays.map((day, idx) => (
+            <button
+              key={idx}
+              onClick={() => setSelectedDay(day.day)}
+              className={`flex flex-col items-center px-4 py-2 rounded-xl border ${
+                selectedDay === day.day
+                  ? "bg-emerald-600 border-emerald-500 text-white"
+                  : "bg-slate-800 border-slate-700 text-gray-300 hover:bg-slate-700"
+              } transition`}
+            >
+              <span className="font-bold">
+                {new Date(day.date).toLocaleDateString("en-GB", {
+                  day: "2-digit",
+                  month: "short",
+                })}
+              </span>
+              <span className="text-sm">{day.day.slice(0, 3)}</span>
+            </button>
+          ))}
+        </div>
 
-                <AnimatePresence>
-                  {expandedDays[day] && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.3 }}
-                      className="border-t border-slate-700"
-                    >
-                      <div className="p-6 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {slots.length > 0 ? (
-                          slots.map((slot, idx) => (
-                            <motion.div
-                              key={idx}
-                              initial={{ opacity: 0, scale: 0.9 }}
-                              animate={{ opacity: 1, scale: 1 }}
-                              transition={{ delay: idx * 0.05 }}
-                              className="bg-gradient-to-br from-slate-700 to-slate-800 rounded-lg p-4 border-2 border-emerald-500/30 hover:border-emerald-400 hover:shadow-lg hover:shadow-emerald-500/10 transition cursor-pointer group"
-                            >
-                              <div className="flex items-center justify-between mb-2">
-                                <span className="text-gray-200 font-semibold">
-                                  {slot.startTime} - {slot.endTime}
-                                </span>
-                                <svg className="w-5 h-5 text-emerald-400 opacity-0 group-hover:opacity-100 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                </svg>
-                              </div>
-                              <div className="flex items-baseline gap-1">
-                                <span className="text-2xl font-bold text-emerald-400">₹{slot.price}</span>
-                                <span className="text-sm text-gray-400">/hour</span>
-                              </div>
-                            </motion.div>
-                          ))
-                        ) : (
-                          <p className="col-span-full text-gray-500 text-center py-4">
-                            No slots available in this price range
+        {/* SLOT SECTIONS */}
+        <div className="mt-8">
+          <h2 className="text-2xl font-bold text-white mb-4">
+            Slots for {selectedDay?.toLowerCase()}
+          </h2>
+
+          {slotsForDay.length === 0 ? (
+            <div className="text-center py-10 bg-slate-800 border border-slate-700 rounded-xl">
+              <p className="text-gray-400 text-lg">No slots available today 😕</p>
+            </div>
+          ) : (
+            Object.entries(groupedSlots).map(([period, slots]) =>
+              slots.length > 0 ? (
+                <div key={period} className="mb-6">
+                  <h3 className="text-xl text-emerald-400 font-semibold mb-3">
+                    {period}
+                  </h3>
+                  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {slots.map((slot, idx) => {
+                      const isDisabled = slot.status !== "AVAILABLE";
+                      return (
+                        <motion.div
+                          key={idx}
+                          whileTap={{ scale: isDisabled ? 1 : 0.95 }}
+                          onClick={() =>
+                            !isDisabled &&
+                            handleSlotSelect(slot, selectedDayData.date)
+                          }
+                          className={`p-4 rounded-xl border-2 transition ${
+                            isDisabled
+                              ? "bg-gray-700 border-gray-600 cursor-not-allowed opacity-50"
+                              : isSlotSelected(slot)
+                              ? "border-emerald-500 bg-emerald-500/20 cursor-pointer"
+                              : "border-slate-700 bg-slate-800 hover:border-emerald-400 cursor-pointer"
+                          }`}
+                        >
+                          <div className="flex justify-between items-center mb-2">
+                            <span className="text-gray-200 font-semibold">
+                              {slot.startTime} - {slot.endTime}
+                            </span>
+                            <span className="text-emerald-400 font-bold">
+                              ₹{slot.price}
+                            </span>
+                          </div>
+                          <p className="text-sm text-gray-400">
+                            {isDisabled ? "Unavailable" : "Tap to select"}
                           </p>
-                        )}
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ) : null
+            )
+          )}
+        </div>
+
+        {/* TOTAL BAR */}
+        {selectedSlots.length > 0 && (
+          <motion.div
+            initial={{ y: 100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            className="fixed bottom-4 left-0 right-0 flex justify-center"
+          >
+            <div className="bg-slate-900 border border-emerald-500 shadow-xl rounded-2xl px-6 py-3 flex items-center gap-6">
+              <p className="text-white text-lg font-semibold">
+                Selected Slots: {selectedSlots.length}
+              </p>
+              <p className="text-emerald-400 text-2xl font-bold">
+                Total: ₹{totalAmount}
+              </p>
+              <button
+                onClick={() => alert("Proceed to Booking")}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg"
+              >
+                Proceed to Book
+              </button>
+            </div>
+          </motion.div>
+        )}
       </div>
     </div>
   );
