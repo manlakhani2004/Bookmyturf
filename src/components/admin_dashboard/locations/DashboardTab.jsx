@@ -4,36 +4,40 @@ import StatsCard from './StatsCard';
 import Button from './ui/Button';
 
 const DashboardTab = ({ locations, onAddLocationClick }) => {
-  const stats = [
-    { 
-      title: 'Total Locations', 
-      value: locations.length, 
-      icon: MapPin, 
-      color: 'from-cyan-400 to-blue-500', 
-      glow: 'shadow-cyan-500/25' 
-    },
-    { 
-      title: 'Total Sports', 
-      value: locations.reduce((acc, loc) => acc + loc.sports.length, 0), 
-      icon: Calendar, 
-      color: 'from-emerald-400 to-green-500', 
-      glow: 'shadow-emerald-500/25' 
-    },
-    { 
-      title: 'Active Bookings', 
-      value: '0', 
-      icon: Users, 
-      color: 'from-purple-400 to-violet-500', 
-      glow: 'shadow-purple-500/25' 
-    },
-    { 
-      title: 'Revenue', 
-      value: '₹0', 
-      icon: TrendingUp, 
-      color: 'from-orange-400 to-red-500', 
-      glow: 'shadow-orange-500/25' 
-    }
-  ];
+const stats = [
+  { 
+    title: 'Total Locations', 
+    value: locations?.length || 0,
+    icon: MapPin, 
+    color: 'from-cyan-400 to-blue-500', 
+    glow: 'shadow-cyan-500/25' 
+  },
+  { 
+    title: 'Total Sports', 
+    value: (locations || []).reduce(
+      (acc, loc) => acc + (loc.sports?.length || 0), 
+      0
+    ),
+    icon: Calendar, 
+    color: 'from-emerald-400 to-green-500', 
+    glow: 'shadow-emerald-500/25' 
+  },
+  { 
+    title: 'Active Bookings', 
+    value: '0', 
+    icon: Users, 
+    color: 'from-purple-400 to-violet-500', 
+    glow: 'shadow-purple-500/25' 
+  },
+  { 
+    title: 'Revenue', 
+    value: '₹0', 
+    icon: TrendingUp, 
+    color: 'from-orange-400 to-red-500', 
+    glow: 'shadow-orange-500/25' 
+  }
+];
+
 
   return (
     <div className="space-y-8 animate-fadeIn">

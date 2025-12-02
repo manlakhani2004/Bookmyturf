@@ -11,7 +11,7 @@ export function sendOtp(email, navigate) {
         dispatch(setLoading(true));
 
         try {
-            const response = await apiConnector("POST", AuthEndPoints.SENDOTP_API,null ,null,{email:email});
+            const response = await apiConnector("POST", AuthEndPoints.SENDOTP_API, null, null, { email: email });
             console.log("response is:", response);
             if (!response.data.Status == "OK") {
                 throw new Error(response.data.Message);
@@ -26,7 +26,7 @@ export function sendOtp(email, navigate) {
     }
 }
 
-export function verifyEmailSignup(firstName, lastName, email,contact, password, otp,role, navigate) {
+export function verifyEmailSignup(firstName, lastName, email, contact, password, otp, role, navigate) {
     return async (dispatch) => {
         const toastId = toast.loading("Loading");
         dispatch(setLoading(true));
@@ -35,9 +35,9 @@ export function verifyEmailSignup(firstName, lastName, email,contact, password, 
                 firstName: firstName,
                 lastName: lastName,
                 email: email,
-                contact : contact,
+                contact: contact,
                 password: password,
-                role:role,
+                role: role,
                 otp: otp
             })
 
@@ -103,8 +103,11 @@ export function Login(email, password, navigate) {
             localStorage.setItem("user", JSON.stringify(userData));
 
             // Redirect
-            if (userData.role === "ADMIN" || userData.role === "SUPERADMIN") {
+            console.log("user is role:",userData.role);
+            if (userData.role === "ADMIN") {
                 navigate("/admin");
+            } else if (userData.role === "SUPER_ADMIN") {
+                navigate("/superadmin/dashboard")
             } else {
                 navigate("/");
             }
@@ -164,18 +167,18 @@ export function Login(email, password, navigate) {
 //     }
 // }
 
-export function Logout(navigate){
-    return (dispatch)=>{
-    try{
-        dispatch(setToken(null));
-        dispatch(setUser(null));
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        
-        toast.success("Logged Out");
-        navigate('/')
-    }catch(error){
-        toast.error("Logout error");
+export function Logout(navigate) {
+    return (dispatch) => {
+        try {
+            dispatch(setToken(null));
+            dispatch(setUser(null));
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+
+            toast.success("Logged Out");
+            navigate('/')
+        } catch (error) {
+            toast.error("Logout error");
+        }
     }
-}
 }

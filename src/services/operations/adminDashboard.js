@@ -1,55 +1,72 @@
-import toast from "react-hot-toast"
+import toast from "react-hot-toast";
 import { apiConnector } from "../apiConnector";
 import { AdminDashboard } from "../apis";
 
-
+// ✅ Call only when needed
 function getToken() {
     const token = localStorage.getItem("token");
     if (!token) {
         toast.error("Authentication token missing. Please login.");
         throw new Error("Token missing");
     }
-    return token.replace(/^"|"$/g, ""); // remove quotes if stored as string
+    return token.replace(/^"|"$/g, ""); // remove quotes
 }
- const token = getToken();
-export function add_location(location, token) {
+
+// -------------------------
+// ADD LOCATION
+// -------------------------
+export function add_location(location) {
     return async () => {
         const toastId = toast.loading("Loading");
-        console.log("api calling");
-        console.log(location);
-        let newLoc = {
-            "name": location.name,
-            "address":location.address,
-            "city": location.city,
-            "state":location.state,
-            "pincode": location.pincode,
-            "mediaFiles":location.mediaFiles
-        }
-        console.log("newlocation: ",newLoc)
+
         try {
-            const response = await apiConnector("POST", AdminDashboard.ADD_LOCATION, newLoc, {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
-            });
+            const token = getToken(); // ✅ token fetched here only
+            console.log("api calling");
+            console.log(location);
+
+            let newLoc = {
+                name: location.name,
+                address: location.address,
+                city: location.city,
+                state: location.state,
+                pincode: location.pincode,
+                mediaFiles: location.mediaFiles
+            };
+
+            const response = await apiConnector(
+                "POST",
+                AdminDashboard.ADD_LOCATION,
+                newLoc,
+                {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                }
+            );
+
             console.log("response is:", response);
-            if(!response.data.status == "OK")
-            {
+
+            if (response.data.Status !== "OK") {
                 throw new Error(response.data.Message);
             }
-            console.log("location added");
-            toast.success("Location added Successfully")
+
+            toast.success("Location added Successfully");
         } catch (error) {
             toast.error("location not added");
-            console.log(error);
+            console.error(error);
         }
+
         toast.dismiss(toastId);
-    }
+    };
 }
 
-
-export async function fetch_all_location(token) {
+// -------------------------
+// FETCH ALL LOCATIONS
+// -------------------------
+export async function fetch_all_location() {
     try {
-        console.log("location fetching " );
+        const token = getToken(); // ✅ SAFE
+        console.log("location fetching");
+
         const response = await apiConnector(
             "GET",
             AdminDashboard.FETCH_ALL_LOCATION,
@@ -66,23 +83,25 @@ export async function fetch_all_location(token) {
             throw new Error(response.data.Message);
         }
 
-        return response.data.Data; // ✅ Return API response here
-
+        return response.data.Data;
     } catch (error) {
         toast.error("Location not fetch");
         console.error(error);
-        return null; // ✅ Return something so caller can handle it
+        return null;
     }
 }
 
-
-
-export async function getLocationById(token,id) {
+// -------------------------
+// GET LOCATION BY ID
+// -------------------------
+export async function getLocationById(id) {
     try {
+        const token = getToken(); // ✔ safe
         console.log("location fetching");
+
         const response = await apiConnector(
             "GET",
-            AdminDashboard.GET_LOCATION_ID+`/${id}`,
+            AdminDashboard.GET_LOCATION_ID + `/${id}`,
             null,
             {
                 "Content-Type": "application/json",
@@ -96,11 +115,10 @@ export async function getLocationById(token,id) {
             throw new Error(response.data.Message);
         }
 
-        return response.data.Data; // ✅ Return API response here
-
+        return response.data.Data;
     } catch (error) {
         toast.error("Location not fetch");
         console.error(error);
-        return null; // ✅ Return something so caller can handle it
+        return null;
     }
 }

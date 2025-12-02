@@ -14,6 +14,8 @@ import FindSports from './pages/FindSports'
 import TurfDetails from './pages/TurfDetails'
 import LocationCategory from './components/admin_dashboard/locations/locationCategory'
 import CheckoutPage from './pages/checkout/CheckoutPage'
+import SuperAdmin from './pages/SuperAdmin'
+
 // import Location from './components/admin_dashboard/sports/Location'
 // import Location from './components/admin_dashboard/sports/page/Location'
 
@@ -40,6 +42,7 @@ function App() {
           <Route path='/turfdetails/:id' element={<TurfDetails/>}/>
           <Route path='/location/:locationID' element={<LocationCategory/> }/>
           <Route path='/checkout/:turfId' element={<CheckoutPage/>}/>
+          <Route path='/superadmin/dashboard' element={<SuperAdmin/>}/>
           {/* <Route path='location/:id' element={<Location/>}/> */}
         </Routes>
       </div>
