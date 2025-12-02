@@ -165,7 +165,7 @@ const Navbar = () => {
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
-
+  console.log("token is",token);
   const toggleMenu = () => setIsOpen(!isOpen);
   const handleLogout = () => dispatch(Logout(navigate));
 

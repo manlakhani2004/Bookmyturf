@@ -68,43 +68,101 @@ export function Login(email, password, navigate) {
     return async (dispatch) => {
         const toastId = toast.loading("Loading...");
         dispatch(setLoading(true));
+
         try {
-            const response = await apiConnector("POST", AuthEndPoints.LOGIN, { email: email, password: password });
-            if (!response.data.Status == "OK") {
-                toast.error(response.data.Message);
-                throw new Error(response.data.Message);
+            const response = await apiConnector(
+                "POST",
+                AuthEndPoints.LOGIN,
+                { email, password }
+            );
+
+            // ❌ WRONG: if (!response.data.Status == "OK")
+            // ✔ FIX:
+            if (response.data.Status !== "OK") {
+                toast.error("email or password incorrect");
+                // throw new Error(response.data.Message);
             }
-            toast.success("login successfull");
 
-            dispatch(setToken(response.data.Data.token));
+            toast.success("Login successful");
 
-            console.log(response.data.Data.token)
-            console.log(response.data.Data.user)
-            const userImage = `https://api.dicebear.com/5.x/initials/svg?seed=${response.data.Data.user.firstName} ${response.data.Data.user.lastName}`
-            dispatch(setUser({ ...response.data.Data.user, image: userImage }));
+            const token = response.data.Data.token;
+            const userData = response.data.Data.user;
 
-            // console.log(response.data.user.token);
-            // console.log(response.data.token);
-            //store USER PROFILE DATA and TOKEN in localStorage
-            localStorage.setItem("user", JSON.stringify(response.data.Data.user));
-            localStorage.setItem("token", JSON.stringify(response.data.Data.token));
-            console.log(response.data.Data.user)
-            if(response.data.Data.user.role == "ADMIN" || response.data.Data.user.role == "SUPERADMIN"  )
-            {
-                navigate('/admin')
-            }else
-            {
-            navigate('/');
+            console.log("TOKEN:", token);
+            console.log("USER:", userData);
+
+            // Save TOKEN in Redux
+            dispatch(setToken(token));
+
+            // Save USER in Redux
+            const userImage = `https://api.dicebear.com/5.x/initials/svg?seed=${userData.firstName} ${userData.lastName}`;
+            dispatch(setUser({ ...userData, image: userImage }));
+
+            // Save in localStorage
+            localStorage.setItem("token", token);
+            localStorage.setItem("user", JSON.stringify(userData));
+
+            // Redirect
+            if (userData.role === "ADMIN" || userData.role === "SUPERADMIN") {
+                navigate("/admin");
+            } else {
+                navigate("/");
             }
         } catch (error) {
-            console.log("LOGIN API ERROR............", error)
-            toast.error(error.response.data.message);
-            // toast.error();
+            console.error("LOGIN API ERROR:", error);
+            toast.error(error?.response?.data?.message || "Login failed");
         }
+
         toast.dismiss(toastId);
-        dispatch(setLoading(false))
-    }
+        dispatch(setLoading(false));
+    };
 }
+
+// export function Login(email, password, navigate) {
+//     return async (dispatch) => {
+//         const toastId = toast.loading("Loading...");
+//         dispatch(setLoading(true));
+//         try {
+//             const response = await apiConnector("POST", AuthEndPoints.LOGIN, { email: email, password: password });
+//             if (!response.data.Status == "OK") {
+//                 toast.error(response.data.Message);
+//                 throw new Error(response.data.Message);
+//             }
+//             toast.success("login successfull");
+
+//             dispatch(setToken(response.data.Data.token));
+
+//             console.log(response.data.Data.token)
+//             console.log(response.data.Data.user)
+//             const userImage = `https://api.dicebear.com/5.x/initials/svg?seed=${response.data.Data.user.firstName} ${response.data.Data.user.lastName}`
+//             dispatch(setUser({ ...response.data.Data.user, image: userImage }));
+
+//             // console.log(response.data.user.token);
+//             // console.log(response.data.token);
+//             //store USER PROFILE DATA and TOKEN in localStorage
+//             localStorage.setItem("user", JSON.stringify(response.data.Data.user));
+//             localStorage.setItem("token", JSON.stringify(response.data.Data.token));
+//             console.log(response.data.Data.user)
+//             if(response.data.Data.user.role == "ADMIN" || response.data.Data.user.role == "SUPERADMIN"  )
+//             {
+//                 navigate('/admin')
+//             dispatch(setToken(response.data.Data.token));
+
+//             }else
+//             {
+//             navigate('/');
+//             dispatch(setToken(response.data.Data.token));
+
+//             }
+//         } catch (error) {
+//             console.log("LOGIN API ERROR............", error)
+//             toast.error(error.response.data.message);
+//             // toast.error();
+//         }
+//         toast.dismiss(toastId);
+//         dispatch(setLoading(false))
+//     }
+// }
 
 export function Logout(navigate){
     return (dispatch)=>{
