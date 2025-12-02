@@ -3,6 +3,15 @@ import { apiConnector } from "../apiConnector";
 import { AdminDashboard } from "../apis";
 
 
+function getToken() {
+    const token = localStorage.getItem("token");
+    if (!token) {
+        toast.error("Authentication token missing. Please login.");
+        throw new Error("Token missing");
+    }
+    return token.replace(/^"|"$/g, ""); // remove quotes if stored as string
+}
+ const token = getToken();
 export function add_location(location, token) {
     return async () => {
         const toastId = toast.loading("Loading");
@@ -40,7 +49,7 @@ export function add_location(location, token) {
 
 export async function fetch_all_location(token) {
     try {
-        console.log("location fetching");
+        console.log("location fetching " );
         const response = await apiConnector(
             "GET",
             AdminDashboard.FETCH_ALL_LOCATION,

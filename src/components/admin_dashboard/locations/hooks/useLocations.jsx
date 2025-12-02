@@ -1,12 +1,20 @@
 import { useState, useCallback } from 'react';
 import { fetch_all_location } from '../../../../services/operations/adminDashboard';
 import { useDispatch, useSelector } from 'react-redux';
+function getToken() {
+		const token = localStorage.getItem("token");
+		if (!token) {
+			toast.error("Authentication token missing. Please login.");
+			throw new Error("Token missing");
+		}
+		return token.replace(/^"|"$/g, ""); // remove quotes if stored as string
+	}
 
 export const useLocations = () => {
   const [locations, setLocations] = useState([]);
   const [loading, setLoading] = useState(false);
     const dispatch = useDispatch();
-  const {token} = useSelector((state)=>state.auth);
+  const token = getToken();
 
 
   // Simulate API calls (replace with actual API endpoints)

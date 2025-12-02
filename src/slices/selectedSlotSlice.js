@@ -3,24 +3,40 @@ import { createSlice } from "@reduxjs/toolkit";
 const selectedSlotSlice = createSlice({
   name: "selectedSlotIds",
   initialState: {
+    // keep both arrays: ids for backend, slot objects for UI
     selectedSlotIds: [],
+    selectedSlots: [], // array of slot objects: { slotId, dayOfWeek, startTime, endTime, price, date, ... }
   },
   reducers: {
-    addSlotId: (state, action) => {
-      if (!state.selectedSlotIds.includes(action.payload)) {
-        state.selectedSlotIds.push(action.payload);
+    // payload: slot object (must contain slotId)
+    addSlot: (state, action) => {
+      const slot = action.payload;
+      if (!slot || !slot.slotId) return;
+      if (!state.selectedSlotIds.includes(slot.slotId)) {
+        state.selectedSlotIds.push(slot.slotId);
+        state.selectedSlots.push(slot);
       }
     },
-    removeSlotId: (state, action) => {
-      state.selectedSlotIds = state.selectedSlotIds.filter(
-        (id) => id !== action.payload
-      );
+    // payload: slotId
+    removeSlotById: (state, action) => {
+      const id = action.payload;
+      state.selectedSlotIds = state.selectedSlotIds.filter((sid) => sid !== id);
+      state.selectedSlots = state.selectedSlots.filter((s) => s.slotId !== id);
     },
+    // clears both arrays
     clearAllSlots: (state) => {
       state.selectedSlotIds = [];
+      state.selectedSlots = [];
+    },
+    // optional: replace whole selection (payload: { ids: [], slots: [] })
+    setAllSlots: (state, action) => {
+      const { ids, slots } = action.payload || {};
+      state.selectedSlotIds = Array.isArray(ids) ? ids : [];
+      state.selectedSlots = Array.isArray(slots) ? slots : [];
     },
   },
 });
 
-export const { addSlotId, removeSlotId, clearAllSlots } = selectedSlotSlice.actions;
+export const { addSlot, removeSlotById, clearAllSlots, setAllSlots } =
+  selectedSlotSlice.actions;
 export default selectedSlotSlice.reducer;

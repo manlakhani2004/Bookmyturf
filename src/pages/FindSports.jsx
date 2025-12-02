@@ -27,7 +27,7 @@ export default function FindSports() {
     city: city || "Surat",
     categories: [],
     slots: [],
-    minPrice: 300,
+    minPrice: 0,
     maxPrice: 2000,
   });
 
