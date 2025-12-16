@@ -6,6 +6,7 @@ import AddLocationModal from './AddLocationModal';
 import BackgroundElements from './common/BackgroundElements';
 import { useLocations } from './hooks/useLocations';
 import './styles/animations.css';
+import BookingsTable from './BookingsTable';
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -39,13 +40,7 @@ const AdminDashboard = () => {
       default:
         return (
           <div className="text-center py-20 animate-fadeIn">
-            <div className="bg-slate-800/60 backdrop-blur-xl rounded-2xl border border-slate-700/50 p-12 shadow-2xl">
-              <h2 className="text-3xl font-bold bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent mb-4">
-                {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}
-              </h2>
-              <p className="text-slate-400 text-lg">This section is coming soon...</p>
-              <div className="mt-6 w-16 h-1 bg-gradient-to-r from-cyan-400 to-blue-500 mx-auto rounded-full"></div>
-            </div>
+            <BookingsTable/>  
           </div>
         );
     }
