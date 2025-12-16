@@ -9,15 +9,13 @@ import LocationsTab from './LocationsTab';
 import AddLocationModal from './AddLocationModal';
 import BackgroundElements from './common/BackgroundElements';
 import { useLocations } from './hooks/useLocations';
+import './styles/animations.css';
 import BookingsTable from './BookingsTable';
 import { Logout } from '../../../services/operations/auth';
-
-import './styles/animations.css';
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [showAddLocationModal, setShowAddLocationModal] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -29,7 +27,7 @@ const AdminDashboard = () => {
     fetchLocations
   } = useLocations();
 
-  // 🔴 LOGOUT HANDLER
+  // 🔴 LOGOUT FUNCTION
   const handleLogout = () => {
     dispatch(Logout(navigate));
   };
@@ -54,33 +52,27 @@ const AdminDashboard = () => {
           />
         );
 
-      case 'bookings':
-        return <BookingsTable />;
-
       default:
-        return null;
+        return (
+          <div className="text-center py-20 animate-fadeIn">
+            <BookingsTable />
+          </div>
+        );
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
       <BackgroundElements />
 
-      {/* SIDEBAR */}
       <Sidebar
-        sidebarOpen={sidebarOpen}
-        setSidebarOpen={setSidebarOpen}
-        currentPage={activeTab}
-        setCurrentPage={setActiveTab}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
       />
 
-      {/* MAIN CONTENT */}
-      <div
-        className={`transition-all duration-300 p-8 w-full ${
-          sidebarOpen ? 'ml-64' : 'ml-20'
-        }`}
-      >
-        {/* 🔵 TOP BAR WITH LOGOUT */}
+      <div className="ml-64 p-8 relative z-10">
+
+        {/* 🔵 TOP BAR */}
         <div className="flex justify-end mb-6">
           <button
             onClick={handleLogout}
@@ -94,7 +86,6 @@ const AdminDashboard = () => {
         {renderActiveTab()}
       </div>
 
-      {/* ADD LOCATION MODAL */}
       {showAddLocationModal && (
         <AddLocationModal
           onClose={() => setShowAddLocationModal(false)}
@@ -107,3 +98,82 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
+
+
+
+// import React, { useState } from 'react';
+// import Sidebar from './Sidebar';
+// import DashboardTab from './DashboardTab';
+// import LocationsTab from './LocationsTab';
+// import AddLocationModal from './AddLocationModal';
+// import BackgroundElements from './common/BackgroundElements';
+// import { useLocations } from './hooks/useLocations';
+// import './styles/animations.css';
+// import BookingsTable from './BookingsTable';
+
+// const AdminDashboard = () => {
+//   const [activeTab, setActiveTab] = useState('dashboard');
+//   const [showAddLocationModal, setShowAddLocationModal] = useState(false);
+  
+//   const {
+//     locations,
+//     loading,
+//     addLocation,
+//     fetchLocations
+//   } = useLocations();
+
+//   const renderActiveTab = () => {
+//     switch (activeTab) {
+//       case 'dashboard':
+//         return (
+//           <DashboardTab 
+//             locations={locations}
+//             onAddLocationClick={() => setShowAddLocationModal(true)}
+//           />
+//         );
+//       case 'locations':
+//         return (
+//           <LocationsTab 
+//             locations={locations}
+//             loading={loading}
+//             onAddLocationClick={() => setShowAddLocationModal(true)}
+//             onRefresh={fetchLocations}
+//           />
+//         );
+//       default:
+//         return (
+//           <div className="text-center py-20 animate-fadeIn">
+//             <BookingsTable/>  
+
+//           </div>
+//         );
+//     }
+//   };
+
+//   return (
+//     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+//       <BackgroundElements />
+      
+//       <Sidebar 
+//         activeTab={activeTab} 
+//         setActiveTab={setActiveTab} 
+//       />
+      
+//       <div className="ml-64 p-8 relative z-10">
+//         {renderActiveTab()}
+//       </div>
+
+//       {showAddLocationModal && (
+//         <AddLocationModal
+//           onClose={() => setShowAddLocationModal(false)}
+//           onAdd={addLocation}
+//           loading={loading}
+//         />
+//       )}
+//     </div>
+//   );
+// };
+
+// export default AdminDashboard;
+
+
