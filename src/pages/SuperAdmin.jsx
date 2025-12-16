@@ -9,7 +9,7 @@ export default function SuperAdmin()
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
     return(
-         <div className="flex h-screen pt-16 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+         <div className="flex h-screen  bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
       <Sidebar 
         sidebarOpen={sidebarOpen}
         setSidebarOpen={setSidebarOpen}
