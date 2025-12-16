@@ -1,5 +1,5 @@
 import Sidebar from "../components/super_admin/layout/Sidebar";
-import Bookings from "../components/super_admin/pages/Bookings";
+import ApproveAdmin from "../components/super_admin/pages/ApproveAdmin";
 import Dashboard from "../components/super_admin/pages/Dashboard";
 import React, { useState } from 'react';
 
@@ -19,7 +19,7 @@ export default function SuperAdmin()
 
       <main className="flex-1 overflow-auto">
         <div className="p-8">
-          {currentPage === 'dashboard' ? <Dashboard /> : <Bookings />}
+          {currentPage === 'dashboard' ? <Dashboard /> : <ApproveAdmin />}
         </div>
       </main>
     </div>

@@ -43,7 +43,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, currentPage, setCurrentPage }) =
           }`}
         >
           <Calendar className="w-5 h-5 flex-shrink-0" />
-          {sidebarOpen && <span className="font-medium">Bookings</span>}
+          {sidebarOpen && <span className="font-medium">Approve Admin</span>}
         </button>
       </nav>
 
