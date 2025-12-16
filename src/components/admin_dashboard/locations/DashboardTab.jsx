@@ -16,7 +16,7 @@ const BASE_URL = "http://localhost:8080/api";
 const DashboardTab = ({ onAddLocationClick }) => {
   const [dashboard, setDashboard] = useState(null);
   const [loading, setLoading] = useState(false);
-
+  const [downloading, setDownloading] = useState(false);
   const token = localStorage.getItem("token");
 
   // ===============================
@@ -41,6 +41,38 @@ const DashboardTab = ({ onAddLocationClick }) => {
       setLoading(false);
     }
   };
+const downloadDashboardCsv = async () => {
+  setDownloading(true);
+  try {
+    const response = await axios.get(`${BASE_URL}/dashboard/download-csv`, {
+      headers: { Authorization: `Bearer ${token}` },
+      responseType: "blob",
+    });
+
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement("a");
+
+    // Use filename exactly as provided by backend
+    let fileName = "Dashboard_Stats.xlsx"; // fallback
+    const contentDisposition = response.headers["content-disposition"];
+    if (contentDisposition) {
+      const fileNameMatch = contentDisposition.match(/filename="?([^"]+)"?/);
+      if (fileNameMatch && fileNameMatch[1]) {
+        fileName = fileNameMatch[1]; // use backend filename
+      }
+    }
+
+    link.href = url;
+    link.setAttribute("download", fileName); // <-- use extracted filename
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  } catch (error) {
+    console.error("CSV DOWNLOAD ERROR:", error);
+  } finally {
+    setDownloading(false);
+  }
+};
 
   useEffect(() => {
     fetchDashboardData();
@@ -136,7 +168,13 @@ const DashboardTab = ({ onAddLocationClick }) => {
           <Button onClick={onAddLocationClick} variant="primary">
             Add Location
           </Button>
-          <Button variant="success">View Reports</Button>
+          <Button
+            variant="success"
+            onClick={downloadDashboardCsv}
+            disabled={downloading}
+          >
+            {downloading ? "Downloading..." : "Download Dashboard CSV"}
+          </Button>
         </div>
       </div>
     </div>

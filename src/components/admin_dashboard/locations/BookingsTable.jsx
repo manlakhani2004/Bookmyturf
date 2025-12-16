@@ -23,12 +23,14 @@ const BookingsTable = () => {
   const [filteredBookings, setFilteredBookings] = useState([]);
   const [statusFilter, setStatusFilter] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+  const [loadingDownload, setLoadingDownload] = useState(false);
+
+  const token = localStorage.getItem('token');
 
   // Fetch bookings from API
   useEffect(() => {
     const fetchBookings = async () => {
       try {
-        const token = localStorage.getItem('token'); // Replace if using other auth
         const { data } = await axios.get(
           'http://localhost:8080/api/bookings/super-admin/confirmed-bookings',
           { headers: { Authorization: `Bearer ${token}` } }
@@ -41,7 +43,7 @@ const BookingsTable = () => {
     };
 
     fetchBookings();
-  }, []);
+  }, [token]);
 
   // Filter and search
   useEffect(() => {
@@ -64,22 +66,39 @@ const BookingsTable = () => {
     setFilteredBookings(filtered);
   }, [statusFilter, searchQuery, bookings]);
 
-  // Download CSV
-  const downloadCSV = () => {
-    const csvHeader = 'Booking ID,User ID,User Name,Sport,Location,Amount,Booking Time\n';
-    const csvRows = filteredBookings.map(b =>
-      `${b.bookingId},${b.userId},"${b.userName}","${b.sportName}","${b.locationName}",${b.totalAmount},${b.bookingTime}`
-    );
-    const csvData = [csvHeader, ...csvRows].join('\n');
-    const blob = new Blob([csvData], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
+  // ================= DOWNLOAD CSV FROM API =================
+  const downloadCSV = async () => {
+    setLoadingDownload(true);
+    try {
+      const response = await axios.get(
+        'http://localhost:8080/api/bookings/admin/download-csv',
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          responseType: 'blob',
+        }
+      );
 
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'super_admin_bookings.csv';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+
+      // Use filename provided by backend
+      const contentDisposition = response.headers['content-disposition'];
+      let fileName = 'bookings.csv'; // fallback
+      if (contentDisposition) {
+        const match = contentDisposition.match(/filename="?([^"]+)"?/);
+        if (match) fileName = match[1];
+      }
+
+      link.href = url;
+      link.setAttribute('download', fileName);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (error) {
+      console.error('CSV DOWNLOAD ERROR:', error);
+    } finally {
+      setLoadingDownload(false);
+    }
   };
 
   return (
@@ -108,10 +127,11 @@ const BookingsTable = () => {
         </div>
 
         <button
-          className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+          className={`bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2`}
           onClick={downloadCSV}
+          disabled={loadingDownload}
         >
-          Export CSV
+          {loadingDownload ? 'Downloading...' : 'Download CSV'}
         </button>
       </div>
 
