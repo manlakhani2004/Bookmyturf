@@ -23,7 +23,8 @@ function App() {
   const location = useLocation();
 
   // Define paths where you want to hide Navbar and Footer
-  const hideLayout = location.pathname.startsWith('/admin');
+  const hideLayout = location.pathname.startsWith('/admin')||
+  location.pathname.startsWith('/superadmin');
 
   return (
     <>
